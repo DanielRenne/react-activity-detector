@@ -27,7 +27,7 @@ const getCurrentTime = () => new Date().getTime();
 
 let scheduledSignoutTimeout, activityEventInterval;
 
-const ActivityDetector =({ activityEvents, timeout, isActive, signOut }) => {
+const ActivityDetector =({ activityEvents, timeout, isActive, signOut, onIdle, onActive }) => {
     const [timeoutScheduled, setTimeoutScheduled] = useState(false);
 
     const scheduleSignout = time => {
@@ -40,7 +40,11 @@ const ActivityDetector =({ activityEvents, timeout, isActive, signOut }) => {
 
             if (currentTime >= scheduledInactivityCheck) {
                 // if already passed scheduled time, do signout
-                signOut("User has loged out due to inactivity");
+                if (signOut)
+                    signOut("User has loged out due to inactivity");
+                if (onIdle) {
+                    onIdle();
+                }
             }
         }, time);
     };
@@ -52,6 +56,8 @@ const ActivityDetector =({ activityEvents, timeout, isActive, signOut }) => {
 
     const handleUserActivityEvent = () => {
         resetTimer();
+        if (onActive)
+            onActive();
     };
 
     const handleStorageChangeEvent = ({ key, newValue }) => {
